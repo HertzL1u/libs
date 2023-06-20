@@ -85,9 +85,10 @@ jobs:
         run: |
           cd module/${{ matrix.module }}
           cmake ${{matrix.config.command}} "${{matrix.config.compiler}}" -S . -B ./build 2>&1 | tee ../../libs/dll/${{matrix.config.path}}/${{ matrix.module }}/build.log && cmake --build ./build --target install 2>&1 | tee -a ../../libs/dll/${{matrix.config.path}}/${{ matrix.module }}/build.log
+          new_version=$(grep "VERSION" version.txt | cut -d' ' -f2 | tr '\n' '.' | sed 's/\.$//')
           available_version=$(grep "VERSION" ../../libs/dll/${{ matrix.config.path }}/${{ matrix.module }}/version.txt | cut -d' ' -f2 | tr '\n' '.' | sed 's/\.$//')
           cd ../../libs
-          if [ $? -ne 0 ]
+          if [ $? -ne 0 ]  || [ "$available_version" != "$new_version" ]
           then
             echo "| ${{ matrix.module }} | ${{ matrix.config.path}} | $available_version | <span style=\"color:red\">failed</span> | [build information](/libs/dll/${{ matrix.config.path }}/${{ matrix.module }}/build.log "build.log") |" >> result.md
           else
